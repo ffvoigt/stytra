@@ -131,7 +131,7 @@ class CameraSource(VideoSource):
         self.downsampling = downsampling
         self.roi = roi
         self.camera_params = camera_params
-
+        
         self.max_buffer_length = max_buffer_length
 
         self.state = None
