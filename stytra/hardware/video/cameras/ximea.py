@@ -24,6 +24,11 @@ class XimeaCamera(Camera):
         """
         super().__init__(**kwargs)
 
+        self.serial_number = None
+        
+        if 'sn' in kwargs:
+            self.serial_number = kwargs['sn']
+
         # Test if API for the camera is available
         try:
             self.cam = xiapi.Camera()
@@ -34,7 +39,11 @@ class XimeaCamera(Camera):
 
     def open_camera(self):
         """ """
-        self.cam.open_device()
+        if self.serial_number:
+            self.cam.open_device_by_SN(str(self.serial_number))
+        else:
+            self.cam.open_device()
+
 
         self.im = xiapi.Image()
 

@@ -39,7 +39,7 @@ class Camera:
         self.cam = None
         self.downsampling = downsampling
         self.roi = roi
-
+        
     def open_camera(self):
         """Initialise the camera."""
 

@@ -98,3 +98,5 @@ docs/source/_static/*.mp4
 
 # MacOS stuff:
 .DS_Store
+
+stytra/examples/ximea_cam_test_sn2.py
