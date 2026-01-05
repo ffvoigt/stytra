@@ -18,8 +18,16 @@ class TailTrackingPipeline(Pipeline):
         self.filter = Prefilter(parent=self.root)
         self.tailtrack = CentroidTrackingMethod(parent=self.filter)
         self.extra_widget = TailStreamPlot
+        #self.display_overlay = CameraViewFish
         self.display_overlay = TailTrackingSelection
 
+class TailTrackingPipeline2(Pipeline):
+    def __init__(self):
+        super().__init__()
+        self.filter = Prefilter(parent=self.root)
+        self.tailtrack = CentroidTrackingMethod(parent=self.filter)
+        self.extra_widget = TailStreamPlot
+        self.display_overlay = TailTrackingSelection
 
 class FishTrackingPipeline(Pipeline):
     def __init__(self):
@@ -47,10 +55,20 @@ class EyeTailTrackingPipeline(Pipeline):
         self.eyetrack = EyeTrackingMethod(parent=self.root)
         self.display_overlay = EyeTailTrackingSelection
 
+# class HeartRatePipeline(Pipeline):
+#     def __init__(self):
+#         super().__init__()
+#         self.filter = Prefilter(parent=self.root)
+#         self.tailtrack = CentroidTrackingMethod(parent=self.filter)
+#         self.extra_widget = TailStreamPlot
+#         self.display_overlay = TailTrackingSelection
+
 
 pipeline_dict = dict(
     tail=TailTrackingPipeline,
+    #tailtwo=TailTrackingPipeline2,
     fish=FishTrackingPipeline,
     eyes=EyeTrackingPipeline,
     eyes_tail=EyeTailTrackingPipeline,
+    #heart=HeartRatePipeline,
 )
