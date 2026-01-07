@@ -1,15 +1,14 @@
 import datetime
+from math import cos, sin
 from queue import Empty
 
 import numpy as np
 import pyqtgraph as pg
-from PyQt5.QtCore import QRectF, QPointF, QTimer
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
-
-from skimage.io import imsave
+from lightparam.gui import ControlToggleIcon, ParameterGui
 from numba import jit
-from math import sin, cos
-from lightparam.gui import ParameterGui, ControlToggleIcon
+from PyQt5.QtCore import QPointF, QRectF, QTimer
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
+from skimage.io import imsave
 
 from stytra.gui.buttons import IconButton, ToggleIconButton, get_icon
 
@@ -516,6 +515,54 @@ class EyeTrackingSelection(CameraSelection):
 
 class EyeTailTrackingSelection(TailTrackingSelection, EyeTrackingSelection):
     pass
+
+
+class HeartRateSelection(CameraSelection):
+    def __init__(self, **kwargs):
+        """ """
+        super().__init__(**kwargs)
+
+        # We need to initialise the rectangular ROI, add it to the area, and remove
+        # the handles from the ellipseROI:
+        self.heart_params = self.experiment.pipeline.hearttrack._params
+        self.roi_pen = dict(color=(40, 5, 200), width=3)
+        self.heart_roi = pg.RectROI(
+            pos=(0, 0), size=(100, 100), movable=True, pen=self.roi_pen
+        )
+        self.initialise_roi(self.heart_roi)
+
+    def retrieve_image(self):
+        """
+        This is the function that is called from the Stytra GUI at every
+        update loop.
+        Note that this function run in the same process of the rest of the
+        GUI and of the stimulus. If you put here some slow code, it will slow
+        down the entire interface and the stimulation update as well!
+        """
+        super().retrieve_image()
+
+        # Pass if there is still no image from the camera:
+        if self.current_image is None:
+            return
+
+    def set_pos_from_tree(self):
+        """Go to parent for definition."""
+        super().set_pos_from_tree()
+        if not self.setting_param_val:
+            self.heart_roi.prepareGeometryChange()
+            self.heart_roi.setSize(self.heart_params.wnd_dim)
+            self.heart_roi.setPos(self.heart_params.win_pos)
+
+    def set_pos_from_roi(self):
+        """Go to parent for definition."""
+        super().set_pos_from_roi()
+
+        self.setting_param_val = True
+        self.heart_params.params.wnd_dim.changed = True
+        self.heart_params.wnd_dim = tuple([int(p) for p in self.heart_roi.size()])
+        self.heart_params.params.wnd_pos.changed = True
+        self.heart_params.wnd_pos = tuple([int(p) for p in self.heart_roi.pos()])
+        self.setting_param_val = False
 
 
 class CameraViewCalib(CameraViewWidget):
