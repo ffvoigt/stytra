@@ -2,8 +2,9 @@ try:
     import nidaqmx
 except:
     pass
-from stytra.stimulation.stimuli import Stimulus, InterpolatedStimulus, DynamicStimulus
 from time import sleep
+
+from stytra.stimulation.stimuli import DynamicStimulus, InterpolatedStimulus, Stimulus
 
 try:
     import u3
@@ -17,7 +18,6 @@ except ImportError:
 
 class NIVoltageStimulus(Stimulus):
     def __init__(self, *args, dev="Dev1", chan="ao0", min_val=0, max_val=0, **kwargs):
-
         self.dev = dev
         self.chan = chan
         self.min_val = min_val
@@ -36,7 +36,7 @@ class SetVoltageStimulus(NIVoltageStimulus):
             task.ao_channels.add_ao_voltage_chan(
                 "{}/{}".format(self.dev, self.chan),
                 min_val=self.min_val,
-                max_val=self.max_val5,
+                max_val=self.max_val,
             )
             task.write(self.voltage)
 
