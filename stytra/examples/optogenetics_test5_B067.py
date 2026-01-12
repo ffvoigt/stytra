@@ -1,0 +1,86 @@
+from lightparam import Param
+
+from stytra import Protocol, Stytra
+from stytra.stimulation.stimuli import Pause
+from stytra.stimulation.stimuli.voltage_stimuli import (
+    NIVoltageStimulus,
+    SetVoltageStimulus,
+    VoltagePulseStimulus,
+)
+
+REQUIRES_EXTERNAL_HARDWARE = True
+
+
+class NIProtocol(Protocol):
+    name = "ni_protocol"
+    stytra_config = dict(
+        camera=dict(type="ximea", camera_params=dict(sn=39314550)),
+    )
+
+    def __init__(self):
+        super(NIProtocol, self).__init__()
+        self.initial_delay = Param(1.0, limits=(0.0, 1000.0), unit="s", loadable=False)
+        self.stimulus_duration = Param(
+            1.0, limits=(0.0, 1000.0), unit="s", loadable=False
+        )
+        self.final_delay = Param(1.0, limits=(0.0, 1000.0), unit="s", loadable=False)
+
+        """
+        X and Y Voltage Limits are set to correspond to approx. 80% of the FOV of heart camera looking at the
+        fish from the side
+        """
+        self.x_pos_in_volt = Param(0.8, limits=(-3.4, 4.8), unit="V", loadable=False)
+        self.y_pos_in_volt = Param(0.8, limits=(-3.0, 4.8), unit="V", loadable=False)
+        """
+        Intensity limits: Don't use a laser intensity setting larger than 5V with the
+        Toptica MLE laser combiners!
+        """
+        self.intensity_in_volt = Param(2.0, limits=(0.0, 5.0), unit="V", loadable=False)
+
+        # NI Device selection
+        self.ni_output_device = "Dev2"
+        self.x_channel = "ao0"
+        self.y_channel = "ao1"
+        self.intensity_channel = "ao2"
+        # Tiny delay for positioning the galvos at the start of the protocol, gets subtracted
+        # at the beginning
+        self.x_and_y_initial_positioning_time = 0.1
+
+    def get_stim_sequence(self):
+        stimuli = [
+            SetVoltageStimulus(
+                dev=self.ni_output_device,
+                chan=self.x_channel,
+                min_val=-10,
+                max_val=10,
+                voltage=self.x_pos_in_volt,
+                duration=self.x_and_y_initial_positioning_time,
+            ),
+            SetVoltageStimulus(
+                dev=self.ni_output_device,
+                chan=self.y_channel,
+                min_val=-10,
+                max_val=10,
+                voltage=self.y_pos_in_volt,
+                duration=self.x_and_y_initial_positioning_time,
+            ),
+            Pause(
+                duration=self.initial_delay
+                - (2 * self.x_and_y_initial_positioning_time)
+            ),
+            VoltagePulseStimulus(
+                dev=self.ni_output_device,
+                chan=self.intensity_channel,
+                min_val=0,
+                max_val=5,
+                high=self.intensity_in_volt,
+                low=0.0,
+                duration=self.stimulus_duration,
+            ),
+            Pause(duration=self.final_delay),
+        ]
+        return stimuli
+
+
+if __name__ == "__main__":
+    st = Stytra(protocol=NIProtocol())

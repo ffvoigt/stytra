@@ -2,6 +2,7 @@ try:
     import nidaqmx
 except:
     pass
+import datetime
 from time import sleep
 
 from stytra.stimulation.stimuli import DynamicStimulus, InterpolatedStimulus, Stimulus
@@ -32,6 +33,7 @@ class SetVoltageStimulus(NIVoltageStimulus):
         super().__init__(*args, **kwargs)
 
     def start(self):
+        self.real_time_start = datetime.datetime.now()
         with nidaqmx.Task() as task:
             task.ao_channels.add_ao_voltage_chan(
                 "{}/{}".format(self.dev, self.chan),
@@ -40,13 +42,15 @@ class SetVoltageStimulus(NIVoltageStimulus):
             )
             task.write(self.voltage)
 
+
 class VoltagePulseStimulus(NIVoltageStimulus):
     def __init__(self, *args, high=1.0, low=0.0, **kwargs):
-        self.high = high # high voltage of the pulse 
-        self.low = low # low voltage of the pulse
+        self.high = high  # high voltage of the pulse
+        self.low = low  # low voltage of the pulse
         super().__init__(*args, **kwargs)
 
     def start(self):
+        self.real_time_start = datetime.datetime.now()
         with nidaqmx.Task() as task:
             task.ao_channels.add_ao_voltage_chan(
                 "{}/{}".format(self.dev, self.chan),
@@ -63,6 +67,7 @@ class VoltagePulseStimulus(NIVoltageStimulus):
                 max_val=self.max_val,
             )
             task.write(self.low)
+
 
 class InterpolatedVoltageStimulus(NIVoltageStimulus, InterpolatedStimulus):
     def __init__(self, *args, **kwargs):
