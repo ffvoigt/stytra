@@ -41,6 +41,9 @@ class NIProtocol(Protocol):
         self.x_channel = "ao1"
         self.y_channel = "ao0"
         self.intensity_channel = "ao2"
+        # Tiny delay for positioning the galvos at the start of the protocol, gets subtracted
+        # at the beginning
+        self.x_and_y_initial_positioning_time = 0.01
 
     def get_stim_sequence(self):
         stimuli = [
@@ -50,6 +53,7 @@ class NIProtocol(Protocol):
                 min_val=-10,
                 max_val=10,
                 voltage=self.x_pos_in_volt,
+                duration=self.x_and_y_initial_positioning_time,
             ),
             SetVoltageStimulus(
                 dev=self.ni_output_device,
@@ -57,24 +61,26 @@ class NIProtocol(Protocol):
                 min_val=-10,
                 max_val=10,
                 voltage=self.y_pos_in_volt,
+                duration=self.x_and_y_initial_positioning_time,
             ),
-            Pause(duration=self.initial_delay),
+            Pause(duration=self.initial_delay-(2*self.x_and_y_initial_positioning_time)),
             SetVoltageStimulus(
                 dev=self.ni_output_device,
                 chan=self.intensity_channel,
                 min_val=0,
                 max_val=5,
                 voltage=self.intensity_in_volt,
+                duration=self.stimulus_duration,
             ),
-            Pause(duration=self.stimulus_duration),
             SetVoltageStimulus(
                 dev=self.ni_output_device,
                 chan=self.intensity_channel,
                 min_val=0,
                 max_val=5,
                 voltage=0,
+                duration=self.x_and_y_initial_positioning_time,
             ),
-            Pause(duration=self.final_delay),
+            Pause(duration=self.final_delay-self.x_and_y_initial_positioning_time,),
         ]
         return stimuli
 
