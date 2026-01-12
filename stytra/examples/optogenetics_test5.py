@@ -5,6 +5,7 @@ from stytra.stimulation.stimuli import Pause
 from stytra.stimulation.stimuli.voltage_stimuli import (
     NIVoltageStimulus,
     SetVoltageStimulus,
+    VoltagePulseStimulus,
 )
 
 REQUIRES_EXTERNAL_HARDWARE = True
@@ -64,23 +65,16 @@ class NIProtocol(Protocol):
                 duration=self.x_and_y_initial_positioning_time,
             ),
             Pause(duration=self.initial_delay-(2*self.x_and_y_initial_positioning_time)),
-            SetVoltageStimulus(
+            VoltagePulseStimulus(
                 dev=self.ni_output_device,
                 chan=self.intensity_channel,
                 min_val=0,
                 max_val=5,
-                voltage=self.intensity_in_volt,
+                high=self.intensity_in_volt,
+                low=0.0,
                 duration=self.stimulus_duration,
             ),
-            SetVoltageStimulus(
-                dev=self.ni_output_device,
-                chan=self.intensity_channel,
-                min_val=0,
-                max_val=5,
-                voltage=0,
-                duration=self.x_and_y_initial_positioning_time,
-            ),
-            Pause(duration=self.final_delay-self.x_and_y_initial_positioning_time),
+            Pause(duration=self.final_delay),
         ]
         return stimuli
 

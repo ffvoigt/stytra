@@ -40,6 +40,29 @@ class SetVoltageStimulus(NIVoltageStimulus):
             )
             task.write(self.voltage)
 
+class VoltagePulseStimulus(NIVoltageStimulus):
+    def __init__(self, *args, high=1.0, low=0.0, **kwargs):
+        self.high = high # high voltage of the pulse 
+        self.low = low # low voltage of the pulse
+        super().__init__(*args, **kwargs)
+
+    def start(self):
+        with nidaqmx.Task() as task:
+            task.ao_channels.add_ao_voltage_chan(
+                "{}/{}".format(self.dev, self.chan),
+                min_val=self.min_val,
+                max_val=self.max_val,
+            )
+            task.write(self.high)
+
+    def stop(self):
+        with nidaqmx.Task() as task:
+            task.ao_channels.add_ao_voltage_chan(
+                "{}/{}".format(self.dev, self.chan),
+                min_val=self.min_val,
+                max_val=self.max_val,
+            )
+            task.write(self.low)
 
 class InterpolatedVoltageStimulus(NIVoltageStimulus, InterpolatedStimulus):
     def __init__(self, *args, **kwargs):
