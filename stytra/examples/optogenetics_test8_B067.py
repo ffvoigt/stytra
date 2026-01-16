@@ -12,7 +12,13 @@ import nidaqmx
 
 REQUIRES_EXTERNAL_HARDWARE = True
 
-
+class NIVoltageStimulus(Stimulus):
+    def __init__(self, *args, dev="Dev1", chan="ao0", min_val=0, max_val=0, **kwargs):
+        self.dev = dev
+        self.chan = chan
+        self.min_val = min_val
+        self.max_val = max_val
+        super().__init__(*args, **kwargs)
 
 class UpdateableVoltagePulseStimulus(NIVoltageStimulus):
     def __init__(self, *args, high=1.0, low=0.0, **kwargs):
