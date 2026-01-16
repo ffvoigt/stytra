@@ -11,6 +11,7 @@ from stytra.stimulation.stimuli.voltage_stimuli import (
 REQUIRES_EXTERNAL_HARDWARE = True
 
 
+
 class NIProtocol(Protocol):
     name = "ni_protocol"
     stytra_config = dict(
@@ -46,8 +47,8 @@ class NIProtocol(Protocol):
         # at the beginning
         self.x_and_y_initial_positioning_time = 0.1
 
-
-        print(super(NIProtocol, self))
+        print("Test output")
+        print(self.__parent__())
 
     def get_stim_sequence(self):
         stimuli = [

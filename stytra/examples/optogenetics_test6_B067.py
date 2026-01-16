@@ -46,8 +46,8 @@ class NIProtocol(Protocol):
         # at the beginning
         self.x_and_y_initial_positioning_time = 0.1
 
-
-        print(super(NIProtocol, self))
+        print("Test output")
+        print(dir(self.__dict__))
 
     def get_stim_sequence(self):
         stimuli = [
