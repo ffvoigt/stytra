@@ -100,3 +100,5 @@ docs/source/_static/*.mp4
 .DS_Store
 
 stytra/examples/ximea_cam_test_sn2.py
+
+.zed/
