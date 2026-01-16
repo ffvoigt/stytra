@@ -1,44 +1,45 @@
 from lightparam import Param
 
 from stytra import Protocol, Stytra
-from stytra.stimulation.stimuli import Pause, VisualStimulus
+from stytra.stimulation.stimuli import Pause, VisualStimulus, Stimulus
 from stytra.stimulation.stimuli.voltage_stimuli import (
     NIVoltageStimulus,
     SetVoltageStimulus,
     VoltagePulseStimulus,
 )
 from pathlib import Path
+import nidaqmx
 
 REQUIRES_EXTERNAL_HARDWARE = True
 
+
+
 class UpdateableVoltagePulseStimulus(NIVoltageStimulus):
-    def __init__(self, *args, high=1.0, low=0.0, duration=1.0, **kwargs):
+    def __init__(self, *args, high=1.0, low=0.0, **kwargs):
         self.high = high  # high voltage of the pulse
         self.low = low  # low voltage of the pulse
-        self.duration = duration
+        # self.duration = duration
         super().__init__(*args, **kwargs)
 
     def update(self):
         fish_vel = self._experiment.estimator.get_velocity()
-        if fish_vel < -5:
-            print('Velocity low')
+
+        if fish_vel < -7:
+            with nidaqmx.Task() as task:
+                task.ao_channels.add_ao_voltage_chan(
+                    "{}/{}".format(self.dev, self.chan),
+                    min_val=self.min_val,
+                    max_val=self.max_val,
+                )
+                task.write(self.high)
         else:
-            print('Velocity high')
-
-
-        # self.real_time_stop = datetime.datetime.now()
-        print('updated')
-
-    '''
-    def start(self):
-        self.real_time_start = datetime.datetime.now()
-        with nidaqmx.Task() as task:
-            task.ao_channels.add_ao_voltage_chan(
-                "{}/{}".format(self.dev, self.chan),
-                min_val=self.min_val,
-                max_val=self.max_val,
-            )
-            task.write(self.high)
+            with nidaqmx.Task() as task:
+                task.ao_channels.add_ao_voltage_chan(
+                    "{}/{}".format(self.dev, self.chan),
+                    min_val=self.min_val,
+                    max_val=self.max_val,
+                )
+                task.write(self.low)
 
     def stop(self):
         with nidaqmx.Task() as task:
@@ -48,7 +49,7 @@ class UpdateableVoltagePulseStimulus(NIVoltageStimulus):
                 max_val=self.max_val,
             )
             task.write(self.low)
-    '''
+
 
 class NIProtocol(Protocol):
     name = "ni_protocol"
@@ -93,9 +94,9 @@ class NIProtocol(Protocol):
             UpdateableVoltagePulseStimulus(
                 dev=self.ni_output_device,
                 chan=self.intensity_channel,
-                min_val=0,
-                max_val=5,
-                high=5,
+                min_val=0.0,
+                max_val=5.0,
+                high=5.0,
                 low=0.0,
                 duration=self.stimulus_duration,
             ),
