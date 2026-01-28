@@ -230,7 +230,8 @@ class ProtocolRunner(QObject):
             self.timer.stop()
             self.i_current_stimulus = 0
             self.t = 0
-            self.sig_protocol_interrupted.emit()
+            if not self.completed:
+                self.sig_protocol_interrupted.emit()
 
     def update_log(self):
         """Append the log appending info from the last stimulus. Add to the
