@@ -1,0 +1,30 @@
+from stytra import Stytra
+from stytra.stimulation.stimuli import Pause
+from pathlib import Path
+from stytra.stimulation import Protocol
+
+REQUIRES_EXTERNAL_HARDWARE = False
+
+
+class Nostim(Protocol):
+    name = "tracking_test"
+
+    # In the stytra_config class attribute we specify a dictionary of
+    # parameters that control camera, tracking, monitor, etc.
+    # In this particular case, we add a stream of frames from one example
+    # movie saved in stytra assets.
+    stytra_config = dict(
+        display=dict(min_framerate=50),
+        tracking=dict(method="fish", embedded=False, estimator="position"),
+        camera=dict(type="ximea", camera_params=dict(sn=39312550))
+    )
+
+    #  For a streaming from real cameras connected to the computer, specify camera type, e.g.:
+    # stytra_config = dict(camera=dict(type="ximea"))
+
+    def get_stim_sequence(self):
+        return [Pause(duration=10)]  # protocol does not do anything
+
+
+if __name__ == "__main__":
+    s = Stytra(protocol=Nostim())
